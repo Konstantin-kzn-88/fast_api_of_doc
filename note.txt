@@ -1,1 +1,9 @@
-1. Запуск сервера: uvicorn main:app --reload
+1. Запуск сервера: uvicorn main:app --reload (потому что точка входа app = FastAPI())
+2. Документация: http://127.0.0.1:8000/docs
+3. JSON схема: http://127.0.0.1:8000/openapi.json
+_________
+4. В OpenAPI каждый HTTP метод называется "операция".
+@app.get() прочитать
+@app.post() создать данные
+@app.put() изменить (обновить)
+@app.delete() удалить
