@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sample Form</title>
+</head>
+<body>
+<form method="post">
+    <input type="number" name="num" value="0"/>
+    <input type="submit">
+</form>
+
+
+<table>
+    {% for dict_item in result %}
+    {% for key, value in dict_item.items() %}
+    <TR>
+
+        <TD class="c1">{{key}}</TD>
+        <TD class="c2">{{value}}</TD>
+
+    </TR>
+    {% endfor %}
+    {% endfor %}
+</table>
+
+
+</body>
+</html>

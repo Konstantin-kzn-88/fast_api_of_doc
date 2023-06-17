@@ -288,3 +288,28 @@
 # async def create_user(user_in: UserIn):
 #     user_saved = fake_save_user(user_in)
 #     return user_saved
+
+from fastapi import FastAPI, Request, Form
+from fastapi.templating import Jinja2Templates
+
+# from src.model import spell_number
+
+app = FastAPI()
+templates = Jinja2Templates(directory="templates/")
+
+
+@app.get('/')
+def read_form():
+    return 'hello world'
+
+
+@app.get("/form")
+def form_post(request: Request):
+    result = [{'Введите': 'данные', '0': '0'}]
+    return templates.TemplateResponse('form.html', context={'request': request, 'result': result})
+
+
+@app.post("/form")
+def form_post(request: Request, num: int = Form(...)):
+    result = [{'A': num, 'B': num + 2}, {'C': num + 3, 'D': num + 4}]
+    return templates.TemplateResponse('form.html', context={'request': request, 'result': result})
