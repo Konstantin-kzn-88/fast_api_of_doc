@@ -288,28 +288,57 @@
 # async def create_user(user_in: UserIn):
 #     user_saved = fake_save_user(user_in)
 #     return user_saved
+# ____Форма с выводом шаблона_______________
+# from fastapi import FastAPI, Request, Form
+# from fastapi.templating import Jinja2Templates
+#
+# # from src.model import spell_number
+#
+# app = FastAPI()
+# templates = Jinja2Templates(directory="templates/")
+#
+#
+# @app.get('/')
+# def read_form():
+#     return 'hello world'
+#
+#
+# @app.get("/form")
+# def form_post(request: Request):
+#     result = [{'Введите': 'данные', '0': '0'}]
+#     return templates.TemplateResponse('form.html', context={'request': request, 'result': result})
+#
+#
+# @app.post("/form")
+# def form_post(request: Request, num: int = Form(...)):
+#     result = [{'A': num, 'B': num + 2}, {'C': num + 3, 'D': num + 4}]
+#     return templates.TemplateResponse('form.html', context={'request': request, 'result': result})
 
-from fastapi import FastAPI, Request, Form
+from fastapi import FastAPI, Request, status, Form
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-
-# from src.model import spell_number
+from fastapi.responses import RedirectResponse
 
 app = FastAPI()
-templates = Jinja2Templates(directory="templates/")
+
+templates = Jinja2Templates(directory="templates")
+json_data = {"jsonarray": [{"name": "Joe", "age": 32}, {"name": "Tom", "age": 34}]}
 
 
-@app.get('/')
-def read_form():
-    return 'hello world'
+@app.get("/chart", response_class=HTMLResponse)
+def get_chart(request: Request):
+    return templates.TemplateResponse("chart.html", {"request": request, "json_data": json_data})
 
+@app.post("/submitUsingFetch")
+def submitUsingFetch(request: Request, input1: str = Form(...), input2: str = Form(...)):
+    return json_data
 
-@app.get("/form")
-def form_post(request: Request):
-    result = [{'Введите': 'данные', '0': '0'}]
-    return templates.TemplateResponse('form.html', context={'request': request, 'result': result})
+@app.post("/submitUsingForm", response_class=HTMLResponse)
+def submitUsingForm(request: Request, input1: str = Form(...), input2: str = Form(...)):
+    #redirect_url = request.url_for('get_chart')
+    #return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
+    return templates.TemplateResponse("chart.html", {"request": request, "json_data": json_data})
 
-
-@app.post("/form")
-def form_post(request: Request, num: int = Form(...)):
-    result = [{'A': num, 'B': num + 2}, {'C': num + 3, 'D': num + 4}]
-    return templates.TemplateResponse('form.html', context={'request': request, 'result': result})
+@app.get("/", response_class=HTMLResponse)
+def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})

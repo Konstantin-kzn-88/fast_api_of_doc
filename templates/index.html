@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> Home</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <script>
+        function send_request() {
+            const formElems = document.getElementById('my_form');
+            var formData = new FormData(formElems);
+            const url = "http://127.0.0.1:8000/submitUsingFetch";
+            fetch(url, {
+                method: 'POST',
+                headers: {'Accept': 'application/json'},
+                body: formData
+            }).then(resp => {
+                return resp.json();
+            }).then(body => {
+                display_chart(body)
+            }).catch(error => {
+                console.error(error);
+            });
+        }
+
+        function display_chart(json_data) {
+            var labels = json_data.jsonarray.map(function (e) {
+                return e.name;
+            });
+            var data = json_data.jsonarray.map(function (e) {
+                return e.age;
+            });
+            const ctx = document.getElementById('myChart');
+            var config = {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Graph Line',
+                        data: data,
+                        backgroundColor: 'rgba(0, 119, 204, 0.3)'
+                    }]
+                }
+            };
+
+            var chart = new Chart(ctx, config);
+        }
+    </script>
+</head>
+<body>
+<form action="/submitUsingForm" method='post' id='my_form'>
+    <label>Input 1:</label><br>
+    <input type="text" id="input1" name="input1" value="0"><br>
+    <label>Input 2:</label><br>
+    <input type="text" id="input2" name="input2" value="0"><br>
+    <input type="submit" value="Submit using Form">
+    <input type="button" value="Submit using Fetch" onclick="send_request()">
+</form>
+<canvas id="myChart"></canvas>
+</body>
+</html>
