@@ -10,3 +10,5 @@ _________
 
 5. График Fast Api
 https://stackoverflow.com/questions/71211282/how-to-use-json-response-from-fastapi-backend-to-create-a-chart-using-chart-js-i
+
+6.

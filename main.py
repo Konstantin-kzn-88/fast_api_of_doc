@@ -1,344 +1,60 @@
-# Первое приложение
-# ________________________
-# from fastapi import FastAPI
-#
-# app = FastAPI()
-#
-#
-# @app.get("/")
-# async def root():
-#     return {"message": "Hello World"}
-# ________________________
-# ________________________
-# Параметризированный ответ
-# ________________________
-# from fastapi import FastAPI
-#
-# app = FastAPI()
-#
-#
-# @app.get("/items/{item_id}")
-# async def read_item(item_id: int):
-#     return {"item_id": item_id}
-# ________________________
-# ________________________
-# Содержание в переменной пути
-# ________________________
-# from fastapi import FastAPI
-#
-# app = FastAPI()
-#
-#
-# @app.get("/files/{file_path:path}")
-# async def read_file(file_path: str):
-#     return {"file_path": file_path}
-# ________________________
-# ________________________
-# Преоопределенные значения пути
-# ________________________
-# from enum import Enum
-#
-# from fastapi import FastAPI
-#
-#
-# class ModelName(str, Enum):
-#     alexnet = "alexnet"
-#     resnet = "resnet"
-#     lenet = "lenet"
-#
-#
-# app = FastAPI()
-#
-#
-# @app.get("/models/{model_name}")
-# async def get_model(model_name: ModelName):
-#     if model_name is ModelName.alexnet:
-#         return {"model_name": model_name, "message": "Deep Learning FTW!"}
-#
-#     if model_name.value == "lenet":
-#         return {"model_name": model_name, "message": "LeCNN all the images"}
-#
-#     return {"model_name": model_name, "message": "Have some residuals"}
-# ________________________
-# ________________________
-# Query-параметры
-# ________________________
-# from fastapi import FastAPI
-#
-# app = FastAPI()
-#
-# fake_items_db = [{"item_name": "Foo"}, {"item_name": "Bar"}, {"item_name": "Baz"}]
-#
-#
-# @app.get("/items/")
-# async def read_item(skip: int = 1, limit: int = 10):
-#     return fake_items_db[skip : skip + limit]
-# ________________________
-# ________________________
-# Query-параметры необязательные и булевы, а так смешение с path параметрами user_id и item_id
-# ________________________
-# from fastapi import FastAPI
-#
-# app = FastAPI()
-#
-#
-# @app.get("/users/{user_id}/items/{item_id}")
-# async def read_user_item(
-#     user_id: int, item_id: str, q: str | None = None, short: bool = False
-# ):
-#     item = {"item_id": item_id, "owner_id": user_id}
-#     if q:
-#         item.update({"q": q})
-#     if not short:
-#         item.update(
-#             {"description": "This is an amazing item that has a long description"}
-#         )
-#     return item
-# ________________________
-# ________________________
-# Query-параметры и валидация строк + регулярки
-# ________________________
-# from typing import Annotated
-# from fastapi import FastAPI, Query
-#
-# app = FastAPI()
-#
-#
-# @app.get("/items/")
-# async def read_items(
-#     q: Annotated[
-#         str | None,
-#         Query(
-#             alias="item-query",
-#             title="Query string",
-#             description="Query string for the items to search in the database that have a good match",
-#             min_length=3,
-#             max_length=50,
-#             regex="^fixedquery$",
-#             deprecated=True,
-#         ),
-#     ] = None
-# ):
-#     results = {"items": [{"item_id": "Foo"}, {"item_id": "Bar"}]}
-#     if q:
-#         results.update({"q": q})
-#     return results
-# ________________________
-# ________________________
-# Path-параметры и валидация числовых данных
-# ________________________
-# В этом примере при указании ge=1, параметр item_id должен быть больше или равен 1 ("greater than or equal").
-# gt: больше (greater than)
-# ge: больше или равно (greater than or equal)
-# lt: меньше (less than)
-# le: меньше или равно (less than or equal)
-# from typing import Annotated
-#
-# from fastapi import FastAPI, Path
-#
-# app = FastAPI()
-#
-#
-# @app.get("/items/{item_id}")
-# async def read_items(
-#     item_id: Annotated[int, Path(title="The ID of the item to get", ge=1)], q: str
-# ):
-#     results = {"item_id": item_id}
-#     if q:
-#         results.update({"q": q})
-#     return results
-
-# ________________________
-# ________________________
-# Body - Множество параметров
-# ________________________
-# from typing import Annotated
-#
-# from fastapi import Body, FastAPI
-# from pydantic import BaseModel
-#
-# app = FastAPI()
-#
-#
-# class Item(BaseModel):
-#     name: str
-#     description: str | None = None
-#     price: float
-#     tax: float | None = None
-#
-#
-# class User(BaseModel):
-#     username: str
-#     full_name: str | None = None
-#
-#
-# @app.put("/items/{item_id}")
-# async def update_item(
-#     item_id: int, item: Item, user: User, importance: Annotated[int, Body()]
-# ):
-#     results = {"item_id": item_id, "item": item, "user": user, "importance": importance}
-#     return results
-
-# ________________________
-# ________________________
-# Body - Поля
-# ________________________
-# from fastapi import Body, FastAPI
-# from pydantic import BaseModel, Field
-#
-# app = FastAPI()
-#
-#
-# class Item(BaseModel):
-#     name: str
-#     description: str | None = Field(
-#         default=None, title="The description of the item", max_length=300
-#     )
-#     price: float = Field(gt=0, description="The price must be greater than zero")
-#     tax: float | None = None
-#
-#
-# @app.put("/items/{item_id}")
-# async def update_item(item_id: int, item: Item = Body(embed=True)):
-#     results = {"item_id": item_id, "item": item}
-#     return results
-# ________________________
-# ________________________
-# Body - Объявление примера
-# ________________________
-# Использование example и examples в OpenAPI¶
-# При использовании любой из этих функций:
-#
-# Path()
-# Query()
-# Header()
-# Cookie()
-# Body()
-# Form()
-# File()
-# вы также можете добавить аргумент, содержащий example или группу examples с дополнительной информацией, которая будет добавлена в OpenAPI.
-# from fastapi import FastAPI
-# from pydantic import BaseModel
-#
-# app = FastAPI()
-#
-#
-# class Item(BaseModel):
-#     name: str
-#     description: str | None = None
-#     price: float
-#     tax: float | None = None
-#
-#     class Config:
-#         schema_extra = {
-#             "example": {
-#                 "name": "Foo",
-#                 "description": "A very nice Item",
-#                 "price": 35.4,
-#                 "tax": 3.2,
-#             }
-#         }
-#
-#
-# @app.put("/items/{item_id}")
-# async def update_item(item_id: int, item: Item):
-#     results = {"item_id": item_id, "item": item}
-#     return results
-
-# ________________________
-# ________________________
-# Модель ответа тип возврата
-# ________________________
-# from fastapi import FastAPI
-# from pydantic import BaseModel, EmailStr
-#
-# app = FastAPI()
-#
-#
-# class UserBase(BaseModel):
-#     username: str
-#     email: EmailStr
-#     full_name: str | None = None
-#
-#
-# class UserIn(UserBase):
-#     password: str
-#
-#
-# class UserOut(UserBase):
-#     pass
-#
-#
-# class UserInDB(UserBase):
-#     hashed_password: str
-#
-#
-# def fake_password_hasher(raw_password: str):
-#     return "supersecret" + raw_password
-#
-#
-# def fake_save_user(user_in: UserIn):
-#     hashed_password = fake_password_hasher(user_in.password)
-#     user_in_db = UserInDB(**user_in.dict(), hashed_password=hashed_password)
-#     print("User saved! ..not really")
-#     return user_in_db
-#
-#
-# @app.post("/user/", response_model=UserOut)
-# async def create_user(user_in: UserIn):
-#     user_saved = fake_save_user(user_in)
-#     return user_saved
-# ____Форма с выводом шаблона_______________
-# from fastapi import FastAPI, Request, Form
-# from fastapi.templating import Jinja2Templates
-#
-# # from src.model import spell_number
-#
-# app = FastAPI()
-# templates = Jinja2Templates(directory="templates/")
-#
-#
-# @app.get('/')
-# def read_form():
-#     return 'hello world'
-#
-#
-# @app.get("/form")
-# def form_post(request: Request):
-#     result = [{'Введите': 'данные', '0': '0'}]
-#     return templates.TemplateResponse('form.html', context={'request': request, 'result': result})
-#
-#
-# @app.post("/form")
-# def form_post(request: Request, num: int = Form(...)):
-#     result = [{'A': num, 'B': num + 2}, {'C': num + 3, 'D': num + 4}]
-#     return templates.TemplateResponse('form.html', context={'request': request, 'result': result})
-
-from fastapi import FastAPI, Request, status, Form
-from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI
 
 app = FastAPI()
 
-templates = Jinja2Templates(directory="templates")
-json_data = {"jsonarray": [{"name": "Joe", "age": 32}, {"name": "Tom", "age": 34}]}
+BOOKS = {
+    'book_1': {'title': 'Title One', 'author': 'Author One', 'category': 'science'},
+    'book_2': {'title': 'Title Two', 'author': 'Author Two', 'category': 'science'},
+    'book_3': {'title': 'Title Three', 'author': 'Author Three', 'category': 'history'},
+    'book_4': {'title': 'Title Four', 'author': 'Author Four', 'category': 'math'},
+    'book_5': {'title': 'Title Five', 'author': 'Author Five', 'category': 'math'},
+    'book_6': {'title': 'Title Six', 'author': 'Author Two', 'category': 'math'}
+}
 
 
-@app.get("/chart", response_class=HTMLResponse)
-def get_chart(request: Request):
-    return templates.TemplateResponse("chart.html", {"request": request, "json_data": json_data})
+@app.get('/')
+async def read_all_books(skip_book: str | None = None):
+    if skip_book:
+        new_books = BOOKS.copy()
+        del new_books[skip_book]
+        return new_books
+    return BOOKS
 
-@app.post("/submitUsingFetch")
-def submitUsingFetch(request: Request, input1: str = Form(...), input2: str = Form(...)):
-    return json_data
 
-@app.post("/submitUsingForm", response_class=HTMLResponse)
-def submitUsingForm(request: Request, input1: str = Form(...), input2: str = Form(...)):
-    #redirect_url = request.url_for('get_chart')
-    #return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
-    return templates.TemplateResponse("chart.html", {"request": request, "json_data": json_data})
+@app.get('/{book_name}')
+async def read_books(book_name: str):
+    return BOOKS[book_name]
 
-@app.get("/", response_class=HTMLResponse)
-def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+
+@app.post('/')
+async def create_books(book_title: str, book_author: str):
+    current_book_id = 0
+    if len(BOOKS) > 0:
+        for book in BOOKS:
+            x = int(book.split('_')[-1])
+            if x > current_book_id:
+                current_book_id = x
+    BOOKS[f'book_{current_book_id + 1}'] = {'title': book_title, 'author': book_author}
+    return BOOKS[f'book_{current_book_id + 1}']
+
+
+@app.put('/{book_name}')
+async def update_books(book_name: str, book_title: str, book_author: str):
+    book_info = {'title': book_title, 'author': book_author}
+    BOOKS[book_name] = book_info
+    return book_info
+
+@app.delete('/{book_name}')
+async def delete_books(book_name: str):
+    del BOOKS[book_name]
+    return f'Book {book_name} delete'
+
+# ___________Assigment_____________
+@app.get('/assigment/')
+async def read_book_assigment(book_name:str):
+    return BOOKS[book_name]
+
+@app.delete('/assigment/')
+async def delete_books_assigment(book_name: str):
+    del BOOKS[book_name]
+    return f'Book {book_name} delete'
