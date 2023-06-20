@@ -33,16 +33,50 @@ BOOKS = []
 
 
 @app.get('/')
-async def read_all_books():
-    if len(BOOKS)<1:
+async def read_all_books(book_to_return: Optional[int] = None):
+    if len(BOOKS) < 1:
         create_book_no_api()
+    if book_to_return and len(BOOKS) >= book_to_return > 0:
+        i = 1
+        new_books = []
+        while i <= book_to_return:
+            new_books.append(BOOKS[i - 1])
+            i += 1
+        return new_books
     return BOOKS
+
+
+@app.get('/book/{book_id}')
+async def read_book(book_id: UUID):
+    for x in BOOKS:
+        if x.id == book_id:
+            return x
 
 
 @app.post('/')
 async def create_book(book: Book):
     BOOKS.append(book)
     return book
+
+
+@app.put('/{book_id}')
+async def update_book(book_id: UUID, book: Book):
+    counter = 0
+    for x in BOOKS:
+        counter += 1
+        if x.id == book_id:
+            BOOKS[counter - 1] = book
+            return BOOKS[counter - 1]
+
+
+@app.delete('/{book_id}')
+async def update_book(book_id: UUID):
+    counter =0
+    for x in BOOKS:
+        counter+=1
+        if x.id == book_id:
+            del BOOKS[counter-1]
+            return f'ID {book_id} del'
 
 
 def create_book_no_api():
