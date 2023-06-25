@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field
 
 from auth import get_current_user, get_user_exception
 
-
 app = FastAPI()
 
 models.Base.metadata.create_all(bind=engine)
@@ -33,15 +32,22 @@ class ToDo(BaseModel):
 async def read_all(db: Session = Depends(get_db)):
     return db.query(models.Todos).all()
 
+
 @app.get('/todos/user')
 async def read_all_by_user(user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     if user is None:
         raise get_user_exception()
     return db.query(models.Todos).filter(models.Todos.owner_id == user.get('user_id')).all()
 
+
 @app.get('/todo/{todo_id}')
-async def read_todo(todo_id: int, db: Session = Depends(get_db)):
-    todo_model = db.query(models.Todos).filter(models.Todos.id == todo_id).first()
+async def read_todo(todo_id: int, user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    if user is None:
+        raise get_user_exception()
+    todo_model = db.query(models.Todos). \
+        filter(models.Todos.id == todo_id). \
+        filter(models.Todos.owner_id == user.get('user_id')) \
+        .first()
     if todo_model is not None:
         return todo_model
     raise http_exception()
@@ -88,12 +94,11 @@ async def delete_todo(todo_id: int, db: Session = Depends(get_db)):
     return successful_response(200)
 
 
-
-
 def http_exception():
     return HTTPException(status_code=404, detail="Todo not found")
 
-def successful_response(status_code:int):
+
+def successful_response(status_code: int):
     return {
         'status': status_code,
         'transaction': 'successful'
