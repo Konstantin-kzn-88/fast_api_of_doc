@@ -2,6 +2,8 @@
 uvicorn auth:app --reload --port 9000
 2. Документация: http://127.0.0.1:8000/docs
 3. JSON схема: http://127.0.0.1:8000/openapi.json
+
+pip freeze >requirements.txt
 _________
 4. В OpenAPI каждый HTTP метод называется "операция".
 @app.get() прочитать
@@ -34,5 +36,59 @@ Bearer - носитель пароля
 создаем ф-цию create_access_token
 добавляем в создание токена @app.post('/token')
 2.11 Пишем ф-цию получить текущего пользователя, которая будет декодировать полученный токен get_current_user.
+________________________________________________________________
+ALEMBIC миграция (измненеие и версионирование базы данных)
+1. установить alembic
+2. в Терминале alembic init alembic
+3. alembic.ini указать пть базы данных sqlalchemy.url = sqlite:///./todos.db
+4. env.py (в директории alembic)
+
+import sys
+sys.path.append('...')
+
+import models #new
+#comment!
+# if config.config_file_name is not None:
+#     fileConfig(config.config_file_name)
+#add!
+config = context.config
+fileConfig(config.config_file_name)
+target_metadata = models.Base.metadata
+5. Создать ревизию
+alembic revision -m 'create phone number for user col'
+
+В каталоге alembic -> version появится изменение
+
+6. В этом изменении изменим функцию upgrade
+def upgrade() -> None:
+    op.add_column('users', sa.Column('phone_number', sa.String(), nullable=True))
+
+7. В терминале говорим изменить таблицу
+alembic upgrade a8eabfd892a5
+
+
+8. если откатить то
+def downgrade() -> None:
+    op.drop_column('users', 'phone_number')
+
+И в терминале alembic downgrade -1
+
+9. Создание таблицы
+alembic revision -m 'create adress table'
+В этом изменении изменим
+def upgrade() -> None:
+    op.create_table('address',
+                    sa.Column('id', sa.Integer(), nullable=False, primary_key=True),
+                    sa.Column('address', sa.String(),nullable=False),
+                    sa.Column('address2', sa.String(), nullable=False),
+                    sa.Column('city', sa.String(), nullable=False),
+                    sa.Column('state', sa.String(), nullable=False),
+                    sa.Column('country', sa.String(), nullable=False),
+                    sa.Column('postalcode', sa.String(), nullable=False)
+                    )
+
+
+def downgrade() -> None:
+    op.drop_table('address')
 
 
