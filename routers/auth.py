@@ -1,7 +1,7 @@
 import sys
 sys.path.append('..')
 
-from fastapi import Depends,status, HTTPException, APIRouter
+from fastapi import Depends,status, HTTPException, APIRouter, Request
 from pydantic import BaseModel
 from typing import Optional
 import models
@@ -12,8 +12,13 @@ from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
 
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+
 SECRET_KEY = 'A~#PLmx$TPkBE*hc1ckryg#sAngY@m'
 ALGORITHM = 'HS256'
+
+templates = Jinja2Templates(directory='templates/')
 
 
 class CreateUser(BaseModel):
@@ -120,6 +125,16 @@ def successful_response(status_code: int):
         'status': status_code,
         'transaction': 'successful'
     }
+
+
+@router.get('/', response_class=HTMLResponse)
+async def authentication_page(request: Request):
+    return templates.TemplateResponse('login.html', {'request': request})
+
+@router.get('/register', response_class=HTMLResponse)
+async def registration_page(request: Request):
+    return templates.TemplateResponse('register.html', {'request': request})
+
 
 # Exception
 def get_user_exception():
