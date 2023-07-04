@@ -39,7 +39,7 @@ class ToDo(BaseModel):
 
 @router.get('/test')
 async def test(request: Request):
-    return templates.TemplateResponse('login.html', {'request': request})
+    return templates.TemplateResponse('register.html', {'request': request})
 
 
 @router.get('/')
