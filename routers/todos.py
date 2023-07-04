@@ -32,8 +32,9 @@ def get_db():
 
 
 @router.get('/', response_class=HTMLResponse)
-async def read_all_by_user(request: Request):
-    return templates.TemplateResponse('home.html', {'request': request} )
+async def read_all_by_user(request: Request, db: Session = Depends(get_db)):
+    todos = db.query(models.Todos).filter(models.Todos.owner_id == 1).all()
+    return templates.TemplateResponse('home.html', {'request': request, 'todos': todos} )
 
 @router.get('/add-todo', response_class=HTMLResponse)
 async def add_new_todo(request: Request):
@@ -57,10 +58,9 @@ async def edit_todo(request: Request):
 #     return templates.TemplateResponse('register.html', {'request': request})
 #
 #
-# @router.get('/')
+# @router.get('/test')
 # async def read_all(db: Session = Depends(get_db)):
 #     return db.query(models.Todos).all()
-#
 #
 # @router.get('/user')
 # async def read_all_by_user(user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
