@@ -2,12 +2,12 @@ import sys
 
 sys.path.append('..')
 
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, HTTPException
 import models
 from database import SessionLocal, engine
 from sqlalchemy.orm import Session
-from pydantic import BaseModel, Field
-from .auth import get_current_user, get_user_exception, verify_password, get_password_hash
+from pydantic import BaseModel
+from .auth import get_current_user, verify_password, get_password_hash
 
 router = APIRouter(
     prefix='/users',
@@ -41,7 +41,6 @@ async def read_all_users(db: Session = Depends(get_db)):
 @router.get('/user/{todo_id}')
 async def user_by_path(user_id: int, db: Session = Depends(get_db)):
     user_model = db.query(models.Users).filter(models.Users.id == user_id).all()
-    print(user_model)
     if user_model is not None:
         return user_model
     return 'Invalid user_id'
@@ -60,7 +59,7 @@ async def user_pass_word_change(user_verification: UserVerification,
                                 user: dict = Depends(get_current_user),
                                                      db: Session = Depends(get_db)):
     if user is None:
-        raise get_user_exception()
+        raise HTTPException(status_code=404, detail='Not Found')
     user_model = db.query(models.Users).filter(models.Users.id == user.get('user_id')).first()
     if user_model is not None:
         if user_verification.user_name == user_model.username and verify_password(user_verification.password, user_model.hashed_password):
@@ -75,7 +74,7 @@ async def user_pass_word_change(user_verification: UserVerification,
 @router.delete('/user')
 async def delete_user(user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
     if user is None:
-        raise get_user_exception()
+        raise HTTPException(status_code=404, detail='Not Found')
     user_model = db.query(models.Users).filter(models.Users.id == user.get('user_id')).first()
     if user_model is None:
         return 'Invalid user or request'
